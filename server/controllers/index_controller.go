@@ -14,7 +14,7 @@ func NewIndexController() *IndexController {
 func (c *IndexController) Index(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		c.getIndex(w, r)
+		c.get(w, r)
 	default:
 		log.Println("Method not allowed")
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -23,6 +23,6 @@ func (c *IndexController) Index(w http.ResponseWriter, r *http.Request) {
 }
 
 // GET: /
-func (c *IndexController) getIndex(w http.ResponseWriter, r *http.Request) {
+func (c *IndexController) get(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello, world!"))
 }

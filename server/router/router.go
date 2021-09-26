@@ -16,8 +16,8 @@ func Init() {
 	googleCallbackController := controllersGoogle.NewCallbackController()
 
 	r.HandleFunc("/", indexController.Index)
-	r.HandleFunc("/google/oauth2", googleOauthController.Get)
-	r.HandleFunc("/google/callback", googleCallbackController.Get)
+	r.HandleFunc("/google/oauth2", googleOauthController.Index)
+	r.HandleFunc("/google/callback", googleCallbackController.Index)
 
 	http.Handle("/", r)
 }

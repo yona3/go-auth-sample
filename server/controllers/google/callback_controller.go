@@ -27,7 +27,18 @@ func NewCallbackController() *CallbackController {
 	return &CallbackController{}
 }
 
-func (c *CallbackController) Get(w http.ResponseWriter, r *http.Request) {
+func (c *CallbackController) Index(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		c.get(w, r)
+	default:
+		log.Println("Method not allowed")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write([]byte("Method not allowed"))
+	}
+}
+
+func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 	req := CallbackRequest{}
 
 	// get form values
