@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"os"
+	"net/http"
 
 	"github.com/joho/godotenv"
+	"github.com/yona3/go-auth-sample/router"
 )
 
 func main() {
@@ -15,6 +15,6 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	id := os.Getenv("GOOGLE_CLIENT_ID")
-	fmt.Println(id)
+	router.Init()
+	http.ListenAndServe(":8080", nil)
 }
