@@ -1,3 +1,7 @@
 # Go Auth Sample
 
-Google, Twitter, Email & Password
+### Todo:
+
+- [ ] Google
+- [ ] Twitter
+- [ ] Email & Password
