@@ -1,11 +1,17 @@
 package controllers
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 )
 
 type IndexController struct{}
+
+type ResponseData struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+}
 
 func NewIndexController() *IndexController {
 	return &IndexController{}
@@ -24,5 +30,17 @@ func (c *IndexController) Index(w http.ResponseWriter, r *http.Request) {
 
 // GET: /
 func (c *IndexController) get(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello, world!"))
+	data := ResponseData{true, "Hello, world!"}
+
+	res, err := json.Marshal(data)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res)
 }
