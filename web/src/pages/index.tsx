@@ -1,5 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
+import { SignIn } from "src/components/SignIn";
 
 import { Layout } from "../components/Layout";
 
@@ -14,7 +15,7 @@ const Index: NextPage = () => {
         />
       </Head>
 
-      <div className="pt-10 text-center">Hello, world!</div>
+      <SignIn />
     </Layout>
   );
 };
