@@ -1,0 +1,7 @@
+**/node_modules/*
+**/out/*
+**/.next/*
+
+.eslintrc.js
+tailwind.config.js
+postcss.config.js
