@@ -14,7 +14,7 @@ var (
 		{Name: "name", Type: field.TypeString, Default: "noname"},
 		{Name: "signin_with", Type: field.TypeEnum, Enums: []string{"email", "google", "twitter"}},
 		{Name: "email", Type: field.TypeString, Unique: true},
-		{Name: "password", Type: field.TypeString},
+		{Name: "password", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "logged_out_at", Type: field.TypeTime},

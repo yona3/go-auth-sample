@@ -19,7 +19,7 @@ func (User) Fields() []ent.Field {
 		field.String("name").Default("noname"),
 		field.Enum("signin_with").Values("email", "google", "twitter"),
 		field.String("email").Unique(),
-		field.String("password").Sensitive(),
+		field.String("password").Sensitive().Nillable().Optional(),
 		field.Time("created_at").Default(time.Now),
 		field.Time("updated_at").Default(time.Now),
 		field.Time("logged_out_at").Default(time.Now),
