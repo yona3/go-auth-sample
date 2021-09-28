@@ -142,6 +142,19 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		userData = new
 		log.Printf("user created. (uuid: %v)\n", userData.UUID)
 	} else {
+		// check signin method
+		if u.SigninWith != "google" {
+			msg := "this email has already been used"
+			log.Println(msg)
+
+			opts := utils.HandleServerErrorOptions{
+				Code:    http.StatusBadRequest,
+				Message: msg,
+			}
+			utils.HandleServerError(w, nil, opts)
+			return
+		}
+
 		userData = u
 		log.Printf("user found. (uuid: %v)\n", userData.UUID)
 	}
