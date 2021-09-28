@@ -23,6 +23,7 @@ require (
 require (
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/googleapis/gax-go/v2 v2.1.0 // indirect
+	github.com/lib/pq v1.10.3
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/sys v0.0.0-20210908233432-aa78b53d3365 // indirect
 	golang.org/x/text v0.3.6 // indirect
