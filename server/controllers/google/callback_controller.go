@@ -17,7 +17,11 @@ import (
 	"google.golang.org/api/option"
 )
 
-var userData *ent.User
+var (
+	userData        *ent.User
+	redirectOptions utils.RedirectOptions
+	defaultOptions  utils.HandleServerErrorOptions
+)
 
 type CallbackController struct {
 	state string
@@ -38,6 +42,12 @@ func NewCallbackController(state string) *CallbackController {
 }
 
 func (c *CallbackController) Index(w http.ResponseWriter, r *http.Request) {
+	// init
+	redirectOptions = utils.NewRedirectOptions(r)
+	defaultOptions = utils.HandleServerErrorOptions{
+		RedirectOptions: redirectOptions,
+	}
+
 	switch r.Method {
 	case "GET":
 		c.get(w, r)
@@ -49,7 +59,7 @@ func (c *CallbackController) Index(w http.ResponseWriter, r *http.Request) {
 			Code:    http.StatusMethodNotAllowed,
 			Message: msg,
 		}
-		utils.HandleServerError(w, nil, opts)
+		utils.HandleServerError(w, nil, opts, defaultOptions)
 	}
 }
 
@@ -94,7 +104,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		opts := utils.HandleServerErrorOptions{
 			Message: msg,
 		}
-		utils.HandleServerError(w, err, opts)
+		utils.HandleServerError(w, err, opts, defaultOptions)
 		return
 	}
 
@@ -106,7 +116,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		opts := utils.HandleServerErrorOptions{
 			Message: msg,
 		}
-		utils.HandleServerError(w, err, opts)
+		utils.HandleServerError(w, err, opts, defaultOptions)
 		return
 	}
 
@@ -114,15 +124,14 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 
 	s, err := v2.NewService(ctx, opts)
 	if err != nil {
-		utils.HandleServerError(w, err)
+		utils.HandleServerError(w, err, defaultOptions)
 		return
 	}
 
 	// get user info from service
 	info, err := s.Userinfo.V2.Me.Get().Do()
 	if err != nil {
-		log.Println(err.Error())
-		utils.HandleServerError(w, err)
+		utils.HandleServerError(w, err, defaultOptions)
 		return
 	}
 
@@ -135,7 +144,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		// create user
 		new, err := db.User.Create().SetEmail(info.Email).SetName(info.Name).SetSigninWith("google").Save(ctx)
 		if err != nil {
-			utils.HandleServerError(w, err)
+			utils.HandleServerError(w, err, defaultOptions)
 			return
 		}
 
@@ -151,7 +160,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 				Code:    http.StatusBadRequest,
 				Message: msg,
 			}
-			utils.HandleServerError(w, nil, opts)
+			utils.HandleServerError(w, nil, opts, defaultOptions)
 			return
 		}
 
@@ -160,7 +169,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if userData == nil {
-		utils.HandleServerError(w, err)
+		utils.HandleServerError(w, err, defaultOptions)
 		return
 	}
 
@@ -180,7 +189,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		opts := utils.HandleServerErrorOptions{
 			Message: msg,
 		}
-		utils.HandleServerError(w, err, opts)
+		utils.HandleServerError(w, err, opts, defaultOptions)
 		return
 	}
 
