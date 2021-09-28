@@ -12,7 +12,7 @@ import (
 
 type CallbackController struct{}
 
-type CallbackRequest struct {
+type GoogleCallbackRequest struct {
 	Code  string `form:"code"`
 	State string `form:"state"`
 }
@@ -33,7 +33,7 @@ func (c *CallbackController) Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
-	req := CallbackRequest{}
+	req := GoogleCallbackRequest{}
 
 	// get form values
 	req.Code = r.FormValue("code")

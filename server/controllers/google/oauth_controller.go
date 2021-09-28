@@ -10,7 +10,7 @@ import (
 
 type OauthController struct{}
 
-type OauthResponse struct {
+type GoogleOauthResponse struct {
 	Ok  bool   `json:"ok"`
 	Url string `json:"url"`
 }
@@ -35,7 +35,7 @@ func (c *OauthController) get(w http.ResponseWriter, r *http.Request) {
 	config := GetConfig()
 	url := config.AuthCodeURL("state", oauth2.AccessTypeOffline, oauth2.ApprovalForce) // ! security issue
 
-	data := OauthResponse{true, url}
+	data := GoogleOauthResponse{true, url}
 
 	res, err := json.Marshal(data)
 	if err != nil {

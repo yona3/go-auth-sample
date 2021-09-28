@@ -8,7 +8,7 @@ import (
 
 type IndexController struct{}
 
-type ResponseData struct {
+type IndexResponse struct {
 	Ok      bool   `json:"ok"`
 	Message string `json:"message"`
 }
@@ -30,7 +30,7 @@ func (c *IndexController) Index(w http.ResponseWriter, r *http.Request) {
 
 // GET: /
 func (c *IndexController) get(w http.ResponseWriter, r *http.Request) {
-	data := ResponseData{true, "Hello, world!"}
+	data := IndexResponse{true, "Hello, world!"}
 
 	res, err := json.Marshal(data)
 	if err != nil {
