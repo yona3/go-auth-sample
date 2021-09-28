@@ -10,3 +10,6 @@ export const getIndex = () =>
   fetcher(apiPaths.root(), {
     method: "GET",
   });
+
+export const signInWithGoogle = () =>
+  fetcher(apiPaths.google.oauth2(), { method: "GET" });
