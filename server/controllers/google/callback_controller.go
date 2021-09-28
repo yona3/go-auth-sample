@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
+	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/yona3/go-auth-sample/database"
 	"github.com/yona3/go-auth-sample/ent"
 	"github.com/yona3/go-auth-sample/ent/user"
@@ -23,6 +26,11 @@ type CallbackController struct {
 type GoogleCallbackRequest struct {
 	Code  string `form:"code"`
 	State string `form:"state"`
+}
+
+type JWTClaims struct {
+	UserUUID uuid.UUID `json:"user_uuid"`
+	jwt.StandardClaims
 }
 
 func NewCallbackController(state string) *CallbackController {
@@ -117,7 +125,6 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		utils.HandleServerError(w, err)
 		return
 	}
-	log.Printf("%v logged in. (email: %v)\n", info.Name, info.Email)
 
 	// get user info from database
 	db := database.GetClient()
@@ -139,7 +146,44 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		log.Printf("user found. (uuid: %v)\n", userData.UUID)
 	}
 
-	// todo: set refresh_token
+	if userData == nil {
+		utils.HandleServerError(w, err)
+		return
+	}
+
+	// generate refresh token
+	claims := JWTClaims{
+		userData.UUID,
+		jwt.StandardClaims{
+			ExpiresAt: 60 * 60 * 24 * 7, // 7 days
+		},
+	}
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenStrnig, err := refreshToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	if err != nil {
+		msg := "failed to generate token"
+		log.Println(msg)
+
+		opts := utils.HandleServerErrorOptions{
+			Message: msg,
+		}
+		utils.HandleServerError(w, err, opts)
+		return
+	}
+
+	// set refresh token to cookie
+	cookie := http.Cookie{
+		Path:     "/",
+		Name:     "token",
+		Value:    tokenStrnig,
+		MaxAge:   60 * 60 * 24 * 7, // 7 days
+		HttpOnly: true,
+		Secure:   false, // !change to true when deploy to production
+		SameSite: http.SameSiteLaxMode,
+	}
+	http.SetCookie(w, &cookie)
+
+	log.Printf("%v logged in. (email: %v)\n", userData.Name, userData.Email)
 
 	url := "http://localhost:3000"
 	http.Redirect(w, r, url, http.StatusFound)

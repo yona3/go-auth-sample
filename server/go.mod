@@ -21,6 +21,7 @@ require (
 )
 
 require (
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/googleapis/gax-go/v2 v2.1.0 // indirect
 	github.com/lib/pq v1.10.3
