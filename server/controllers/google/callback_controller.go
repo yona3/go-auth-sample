@@ -112,7 +112,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("user is logged in. (email: %v)\n", info.Email)
+	log.Printf("user logged in. (email: %v)\n", info.Email)
 
 	// todo: set refresh_token
 
