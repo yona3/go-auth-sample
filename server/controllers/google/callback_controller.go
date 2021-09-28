@@ -2,13 +2,19 @@ package controllersGoogle
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/yona3/go-auth-sample/database"
+	"github.com/yona3/go-auth-sample/ent"
+	"github.com/yona3/go-auth-sample/ent/user"
 	"github.com/yona3/go-auth-sample/utils"
 	v2 "google.golang.org/api/oauth2/v2"
 	"google.golang.org/api/option"
 )
+
+var userData *ent.User
 
 type CallbackController struct {
 	state string
@@ -104,15 +110,34 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get user info
-	info, err := s.Tokeninfo().AccessToken(tok.AccessToken).Context(ctx).Do()
+	// get user info from service
+	info, err := s.Userinfo.V2.Me.Get().Do()
 	if err != nil {
 		log.Println(err.Error())
 		utils.HandleServerError(w, err)
 		return
 	}
+	log.Printf("%v logged in. (email: %v)\n", info.Name, info.Email)
 
-	log.Printf("user logged in. (email: %v)\n", info.Email)
+	// get user info from database
+	db := database.GetClient()
+	u, err := db.User.Query().Where(user.Email(info.Email)).Only(ctx)
+	if err != nil {
+		fmt.Println("user not found")
+
+		// create user
+		new, err := db.User.Create().SetEmail(info.Email).SetName(info.Name).SetSigninWith("google").Save(ctx)
+		if err != nil {
+			utils.HandleServerError(w, err)
+			return
+		}
+
+		userData = new
+		log.Printf("user created. (uuid: %v)\n", userData.UUID)
+	} else {
+		userData = u
+		log.Printf("user found. (uuid: %v)\n", userData.UUID)
+	}
 
 	// todo: set refresh_token
 
