@@ -2,7 +2,6 @@ package controllersGoogle
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -11,15 +10,17 @@ import (
 	"google.golang.org/api/option"
 )
 
-type CallbackController struct{}
+type CallbackController struct {
+	state string
+}
 
 type GoogleCallbackRequest struct {
 	Code  string `form:"code"`
 	State string `form:"state"`
 }
 
-func NewCallbackController() *CallbackController {
-	return &CallbackController{}
+func NewCallbackController(state string) *CallbackController {
+	return &CallbackController{state}
 }
 
 func (c *CallbackController) Index(w http.ResponseWriter, r *http.Request) {
@@ -38,6 +39,7 @@ func (c *CallbackController) Index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GET: /google/callback
 func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 	req := GoogleCallbackRequest{}
 
@@ -46,16 +48,31 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 	req.State = r.FormValue("state")
 
 	config := GetConfig()
+	state := c.state
+
+	// check state is valid
+	if req.State != state {
+		msg := "Invalid state"
+		log.Println(msg)
+
+		opts := utils.HandleServerErrorOptions{
+			Code:    http.StatusBadRequest,
+			Message: msg,
+		}
+		utils.HandleServerError(w, nil, opts)
+		return
+	}
+
 	ctx := context.Background()
 
-	// todo: check state
-
+	// get token
 	tok, err := config.Exchange(ctx, req.Code)
 	if err != nil {
 		utils.HandleServerError(w, err)
 		return
 	}
 
+	// check token is valid
 	if !tok.Valid() {
 		msg := "invalid token"
 		log.Println(msg)
@@ -95,10 +112,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("user is logged in. (email: %v)\n", info.Email)
-
-	fmt.Printf("access token: %v\n", tok.AccessToken)
-	fmt.Printf("refresh token: %v\n", tok.RefreshToken)
+	log.Printf("user is logged in. (email: %v)\n", info.Email)
 
 	// todo: set refresh_token
 

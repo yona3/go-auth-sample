@@ -6,16 +6,17 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/yona3/go-auth-sample/controllers"
 	controllersGoogle "github.com/yona3/go-auth-sample/controllers/google"
-	"github.com/yona3/go-auth-sample/middleware"
+	"github.com/yona3/go-auth-sample/utils"
 )
 
 func Init() {
 	r := mux.NewRouter()
-	c := middleware.CORS()
+	c := NewCors()
+	state := utils.GenerateRandomString(32)
 
 	indexController := controllers.NewIndexController()
-	googleOauthController := controllersGoogle.NewOauthController()
-	googleCallbackController := controllersGoogle.NewCallbackController()
+	googleOauthController := controllersGoogle.NewOauthController(state)
+	googleCallbackController := controllersGoogle.NewCallbackController(state)
 
 	r.HandleFunc("/", indexController.Index)
 	r.HandleFunc("/google/oauth2", googleOauthController.Index)

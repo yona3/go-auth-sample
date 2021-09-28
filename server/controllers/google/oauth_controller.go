@@ -2,6 +2,7 @@ package controllersGoogle
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -9,15 +10,17 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type OauthController struct{}
+type OauthController struct {
+	state string
+}
 
 type GoogleOauthResponse struct {
 	Ok  bool   `json:"ok"`
 	Url string `json:"url"`
 }
 
-func NewOauthController() *OauthController {
-	return &OauthController{}
+func NewOauthController(state string) *OauthController {
+	return &OauthController{state}
 }
 
 func (c *OauthController) Index(w http.ResponseWriter, r *http.Request) {
@@ -36,11 +39,14 @@ func (c *OauthController) Index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// redirect to AuthCodeURL
+// GET: /google/oauth2
 func (c *OauthController) get(w http.ResponseWriter, r *http.Request) {
 	config := GetConfig()
-	// todo: change state
-	url := config.AuthCodeURL("state", oauth2.AccessTypeOffline, oauth2.ApprovalForce)
+
+	// generate redirect url
+	state := c.state
+	fmt.Println("oauth state:", state)
+	url := config.AuthCodeURL(state, oauth2.AccessTypeOffline, oauth2.ApprovalForce)
 
 	data := GoogleOauthResponse{true, url}
 
