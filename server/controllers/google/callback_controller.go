@@ -2,7 +2,7 @@ package controllersGoogle
 
 import (
 	"context"
-	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -15,12 +15,6 @@ type CallbackController struct{}
 type CallbackRequest struct {
 	Code  string `form:"code"`
 	State string `form:"state"`
-}
-
-type ResponseData struct {
-	UserId      string `json:"user_id"`
-	Email       string `json:"email"`
-	AccessToken string `json:"access_token"`
 }
 
 func NewCallbackController() *CallbackController {
@@ -65,6 +59,14 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// check refresh token is empty
+	if tok.RefreshToken == "" {
+		log.Println("refresh token is empty")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
 	opts := option.WithHTTPClient(config.Client(ctx, tok))
 
 	s, err := v2.NewService(ctx, opts)
@@ -76,7 +78,6 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get user info
-
 	info, err := s.Tokeninfo().AccessToken(tok.AccessToken).Context(ctx).Do()
 	if err != nil {
 		log.Println(err)
@@ -85,26 +86,13 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("user is logged in. (email: %v)\n", info.Email)
+
+	fmt.Printf("access token: %v\n", tok.AccessToken)
+	fmt.Printf("refresh token: %v\n", tok.RefreshToken)
+
 	// todo: set refresh_token
 
-	data := ResponseData{
-		UserId:      info.UserId,
-		Email:       info.Email,
-		AccessToken: tok.AccessToken,
-	}
-
-	b, err := json.Marshal(data)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	log.Println(string(b))
-
-	// return json
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(b)
+	url := "http://localhost:3000"
+	http.Redirect(w, r, url, http.StatusFound)
 }
