@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/yona3/go-auth-sample/utils"
 	v2 "google.golang.org/api/oauth2/v2"
 	"google.golang.org/api/option"
 )
@@ -26,9 +27,14 @@ func (c *CallbackController) Index(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		c.get(w, r)
 	default:
-		log.Println("Method not allowed")
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Method not allowed"))
+		msg := "Method not allowed"
+		log.Println(msg)
+
+		opts := utils.HandleServerErrorOptions{
+			Code:    http.StatusMethodNotAllowed,
+			Message: msg,
+		}
+		utils.HandleServerError(w, nil, opts)
 	}
 }
 
@@ -46,24 +52,30 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 
 	tok, err := config.Exchange(ctx, req.Code)
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		utils.HandleServerError(w, err)
 		return
 	}
 
 	if !tok.Valid() {
-		log.Println("valid token")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		msg := "invalid token"
+		log.Println(msg)
+
+		opts := utils.HandleServerErrorOptions{
+			Message: msg,
+		}
+		utils.HandleServerError(w, err, opts)
 		return
 	}
 
 	// check refresh token is empty
 	if tok.RefreshToken == "" {
-		log.Println("refresh token is empty")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		msg := "refresh token is empty"
+		log.Println(msg)
+
+		opts := utils.HandleServerErrorOptions{
+			Message: msg,
+		}
+		utils.HandleServerError(w, err, opts)
 		return
 	}
 
@@ -71,18 +83,15 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 
 	s, err := v2.NewService(ctx, opts)
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		utils.HandleServerError(w, err)
 		return
 	}
 
 	// get user info
 	info, err := s.Tokeninfo().AccessToken(tok.AccessToken).Context(ctx).Do()
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		log.Println(err.Error())
+		utils.HandleServerError(w, err)
 		return
 	}
 

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/yona3/go-auth-sample/utils"
 )
 
 type IndexController struct{}
@@ -22,9 +24,14 @@ func (c *IndexController) Index(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		c.get(w, r)
 	default:
-		log.Println("Method not allowed")
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Method not allowed"))
+		msg := "Method not allowed"
+		log.Println(msg)
+
+		opts := utils.HandleServerErrorOptions{
+			Code:    http.StatusMethodNotAllowed,
+			Message: msg,
+		}
+		utils.HandleServerError(w, nil, opts)
 	}
 }
 
@@ -34,9 +41,7 @@ func (c *IndexController) get(w http.ResponseWriter, r *http.Request) {
 
 	res, err := json.Marshal(data)
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal server error"))
+		utils.HandleServerError(w, err)
 		return
 	}
 

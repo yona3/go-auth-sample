@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/yona3/go-auth-sample/utils"
 	"golang.org/x/oauth2"
 )
 
@@ -24,24 +25,28 @@ func (c *OauthController) Index(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		c.get(w, r)
 	default:
-		log.Println("Method not allowed")
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Method not allowed"))
+		msg := "Method not allowed"
+		log.Println(msg)
+
+		opts := utils.HandleServerErrorOptions{
+			Code:    http.StatusMethodNotAllowed,
+			Message: msg,
+		}
+		utils.HandleServerError(w, nil, opts)
 	}
 }
 
 // redirect to AuthCodeURL
 func (c *OauthController) get(w http.ResponseWriter, r *http.Request) {
 	config := GetConfig()
-	url := config.AuthCodeURL("state", oauth2.AccessTypeOffline, oauth2.ApprovalForce) // ! security issue
+	// todo: change state
+	url := config.AuthCodeURL("state", oauth2.AccessTypeOffline, oauth2.ApprovalForce)
 
 	data := GoogleOauthResponse{true, url}
 
 	res, err := json.Marshal(data)
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal server error"))
+		utils.HandleServerError(w, err)
 		return
 	}
 
