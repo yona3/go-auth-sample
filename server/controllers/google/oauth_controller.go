@@ -2,7 +2,6 @@ package controllersGoogle
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -45,7 +44,6 @@ func (c *OauthController) get(w http.ResponseWriter, r *http.Request) {
 
 	// generate redirect url
 	state := c.state
-	fmt.Println("oauth state:", state)
 	url := config.AuthCodeURL(state, oauth2.AccessTypeOffline, oauth2.ApprovalForce)
 
 	data := GoogleOauthResponse{true, url}
