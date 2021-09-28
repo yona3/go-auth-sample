@@ -1,16 +1,29 @@
 import { useRouter } from "next/dist/client/router";
 import type { VFC } from "react";
+import { useEffect } from "react";
 import { signInWithGoogle } from "src/api";
+import { useError } from "src/hooks/useError";
 
 import { Button } from "./uiParts/Button";
 
 export const SignIn: VFC = () => {
+  const { error } = useError();
   const router = useRouter();
 
+  useEffect(() => {
+    if (error) alert(error);
+  }, [error]);
+
   const handleSignin = async () => {
-    const res = await signInWithGoogle();
-    const data = await res.json();
-    router.push(data.url);
+    try {
+      const res = await signInWithGoogle();
+      const data = await res.json();
+
+      if (!data.ok) throw new Error("failed to signin");
+      router.push(data.url);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
