@@ -10,7 +10,9 @@ require (
 
 require (
 	cloud.google.com/go v0.94.1 // indirect
+	entgo.io/ent v0.9.1
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/uuid v1.3.0
 	github.com/rs/cors v1.8.0
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420 // indirect
 	google.golang.org/api v0.57.0
