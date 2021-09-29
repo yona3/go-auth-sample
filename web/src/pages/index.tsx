@@ -2,15 +2,14 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { useEffect } from "react";
 import { getIndex } from "src/api";
-// import { Home } from "src/components/Home";
+import { Home } from "src/components/Home";
 import { SignIn } from "src/components/SignIn";
-import { useAccessToken } from "src/hooks/useAccessToken";
+import { useMe } from "src/hooks/useMe";
 
 import { Layout } from "../components/Layout";
 
 const Index: NextPage = () => {
-  const { accessToken } = useAccessToken();
-  console.log("access token: ", accessToken);
+  const { me } = useMe()
 
   // fetch access token
   useEffect(() => {
@@ -36,8 +35,7 @@ const Index: NextPage = () => {
         />
       </Head>
 
-      <SignIn />
-      {/* <Home /> */}
+      {me ? <Home me={me} /> : <SignIn />}
     </Layout>
   );
 };

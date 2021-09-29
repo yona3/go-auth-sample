@@ -17,5 +17,14 @@ export const fetchAccessToken = () =>
     credentials: "include",
   });
 
+export const fetchMe = (accessToken: string) =>
+  fetcher(apiPaths.users.me(), {
+    method: "GET",
+    headers: {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
 export const signInWithGoogle = () =>
   fetcher(apiPaths.google.oauth2(), { method: "GET" });
