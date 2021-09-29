@@ -11,5 +11,11 @@ export const getIndex = () =>
     method: "GET",
   });
 
+export const fetchAccessToken = () =>
+  fetcher(apiPaths.token(), {
+    method: "POST",
+    credentials: "include",
+  });
+
 export const signInWithGoogle = () =>
   fetcher(apiPaths.google.oauth2(), { method: "GET" });
