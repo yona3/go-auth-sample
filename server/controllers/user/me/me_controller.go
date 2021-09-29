@@ -1,10 +1,13 @@
 package controllersMe
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 	"net/http"
 
+	"github.com/google/uuid"
+	"github.com/yona3/go-auth-sample/database"
+	"github.com/yona3/go-auth-sample/ent/user"
 	"github.com/yona3/go-auth-sample/utils"
 )
 
@@ -37,8 +40,53 @@ func (c *MeController) Index(w http.ResponseWriter, r *http.Request) {
 
 // GET: /users/me
 func (c *MeController) get(w http.ResponseWriter, r *http.Request) {
-	// (check access token in middleware!)
+	ctx := r.Context()
+
+	// get jwt claims from context
+	userUUID, err := utils.GetContextUserUUID(ctx)
+	if err != nil {
+		utils.HandleServerError(w, err)
+	}
+
+	// parse uuid from string
+	id, err := uuid.Parse(userUUID)
+	if err != nil {
+		msg := "UUID is invalid"
+		log.Println(msg)
+
+		opts := utils.HandleServerErrorOptions{
+			Code:    http.StatusBadRequest,
+			Message: msg,
+		}
+		utils.HandleServerError(w, nil, opts)
+		return
+	}
+	db := database.GetClient()
+
 	// get user
+	u, err := db.User.Query().Where(user.UUID(id)).Only(ctx)
+	if err != nil {
+		msg := "User not found"
+		log.Println(msg)
+
+		opts := utils.HandleServerErrorOptions{
+			Code:    http.StatusNotFound,
+			Message: msg,
+		}
+		utils.HandleServerError(w, nil, opts)
+		return
+	}
+
 	// return user
-	fmt.Println("GET: /users/me")
+	res, err := json.Marshal(u)
+	if err != nil {
+		utils.HandleServerError(w, err)
+		return
+	}
+
+	log.Println("GET: /users/me")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
 }
