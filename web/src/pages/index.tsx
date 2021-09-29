@@ -1,13 +1,17 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useEffect } from "react";
-import { fetchAccessToken, getIndex } from "src/api";
+import { getIndex } from "src/api";
 // import { Home } from "src/components/Home";
 import { SignIn } from "src/components/SignIn";
+import { useAccessToken } from "src/hooks/useAccessToken";
 
 import { Layout } from "../components/Layout";
 
 const Index: NextPage = () => {
+  const { accessToken } = useAccessToken();
+  console.log("access token: ", accessToken);
+
   // fetch access token
   useEffect(() => {
     (async () => {
@@ -16,8 +20,6 @@ const Index: NextPage = () => {
         const data = await res.json();
 
         console.log(data);
-
-        fetchAccessToken();
       } catch (err) {
         console.error(err);
       }
