@@ -6,9 +6,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
 	"github.com/yona3/go-auth-sample/database"
 	"github.com/yona3/go-auth-sample/ent"
 	"github.com/yona3/go-auth-sample/ent/user"
@@ -30,11 +30,6 @@ type CallbackController struct {
 type GoogleCallbackRequest struct {
 	Code  string `form:"code"`
 	State string `form:"state"`
-}
-
-type JWTClaims struct {
-	UserUUID uuid.UUID `json:"user_uuid"`
-	jwt.StandardClaims
 }
 
 func NewCallbackController(state string) *CallbackController {
@@ -174,12 +169,8 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// generate refresh token
-	claims := JWTClaims{
-		userData.UUID,
-		jwt.StandardClaims{
-			ExpiresAt: 60 * 60 * 24 * 7, // 7 days
-		},
-	}
+	expiresAt := time.Now().Add(time.Hour * 24 * 7).Unix()
+	claims := utils.NewJWTClaims(userData.UUID, expiresAt)
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenStrnig, err := refreshToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
