@@ -7,6 +7,7 @@ func NewCors() *cors.Cors {
 		AllowedOrigins:   []string{"http://localhost:3000"},
 		AllowedMethods:   []string{"GET", "POST"},
 		AllowCredentials: true,
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 	})
 
 	return c
