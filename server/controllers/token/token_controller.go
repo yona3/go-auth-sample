@@ -174,7 +174,7 @@ func (c *TokenController) post(w http.ResponseWriter, r *http.Request) {
 		utils.HandleServerError(w, nil, opts)
 	}
 
-	fmt.Println(string(res))
+	log.Println("POST: /token")
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

@@ -196,7 +196,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &cookie)
 
-	log.Printf("%v logged in. (email: %v)\n", userData.Name, userData.Email)
+	log.Println("GET: /google/callback")
 
 	url := "http://localhost:3000"
 	http.Redirect(w, r, url, http.StatusFound)
