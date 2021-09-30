@@ -23,6 +23,7 @@ export const Home: VFC<Props> = ({ me }) => {
 
       handleRevokeAccessToken();
       console.log(data.message);
+      console.log("Logged out at:", data.logged_out_at);
     } catch (err) {
       console.error(err);
     }
