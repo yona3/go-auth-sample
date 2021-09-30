@@ -11,8 +11,10 @@ export const useMe = () => {
 
   // todo: add handle logout
 
+  // set me on mount
   useEffect(() => {
-    if (!accessToken || me) return setMe(null);
+    if (!accessToken) return setMe(null);
+    if (me) return;
 
     // fetch me
     (async () => {
