@@ -1,5 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
+import Link from "next/link";
 import { useEffect } from "react";
 import { getIndex } from "src/api";
 import { Home } from "src/components/Home";
@@ -9,7 +10,7 @@ import { useMe } from "src/hooks/useMe";
 import { Layout } from "../components/Layout";
 
 const Index: NextPage = () => {
-  const { me } = useMe()
+  const { me } = useMe();
 
   // fetch access token
   useEffect(() => {
@@ -36,6 +37,12 @@ const Index: NextPage = () => {
       </Head>
 
       {me ? <Home me={me} /> : <SignIn />}
+
+      <div className="mt-12 text-center">
+        <Link href="/about">
+          <a className="text-blue-400 underline">About</a>
+        </Link>
+      </div>
     </Layout>
   );
 };
