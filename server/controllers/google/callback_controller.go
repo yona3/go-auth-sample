@@ -5,10 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"time"
 
-	"github.com/golang-jwt/jwt"
 	"github.com/yona3/go-auth-sample/database"
 	"github.com/yona3/go-auth-sample/ent"
 	"github.com/yona3/go-auth-sample/ent/user"
@@ -168,12 +165,8 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// generate refresh token
-	expiresAt := time.Now().Add(time.Hour * 24 * 7).Unix()
-	claims := utils.NewJWTClaims(userData.UUID, expiresAt)
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenStrnig, err := refreshToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
-	if err != nil {
+	// set refresh token to cookie
+	if utils.SetRefreshToken(w, userData.UUID); err != nil {
 		msg := "failed to generate token"
 		log.Println(msg)
 
@@ -183,18 +176,6 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		utils.HandleServerError(w, err, opts, defaultOptions)
 		return
 	}
-
-	// set refresh token to cookie
-	cookie := http.Cookie{
-		Path:     "/",
-		Name:     "token",
-		Value:    tokenStrnig,
-		MaxAge:   60 * 60 * 24 * 7, // 7 days
-		HttpOnly: true,
-		Secure:   false, // !change to true when deploy to production
-		SameSite: http.SameSiteLaxMode,
-	}
-	http.SetCookie(w, &cookie)
 
 	log.Println("GET: /google/callback")
 

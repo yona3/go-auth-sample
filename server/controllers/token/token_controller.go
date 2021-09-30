@@ -157,6 +157,18 @@ func (c *TokenController) post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// refresh refresh token
+	if err := utils.SetRefreshToken(w, u.UUID); err != nil {
+		msg := "Failed to set refresh token"
+		log.Println(msg)
+
+		opts := utils.HandleServerErrorOptions{
+			Message: msg,
+		}
+		utils.HandleServerError(w, nil, opts)
+		return
+	}
+
 	// return access_token
 	data := TokenResponse{
 		Ok:          true,
