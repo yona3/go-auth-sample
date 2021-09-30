@@ -9,11 +9,9 @@ export const useMe = () => {
   const [me, setMe] = useRecoilState(meState);
   const { accessToken } = useAccessToken();
 
-  // todo: add handle logout
-
   // set me on mount
   useEffect(() => {
-    if (!accessToken) return setMe(null);
+    if (!accessToken) return setMe(null); // logout
     if (me) return;
 
     // fetch me

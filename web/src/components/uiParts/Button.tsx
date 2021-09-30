@@ -2,19 +2,20 @@ import type { ReactNode, VFC } from "react";
 
 type Props = {
   children: ReactNode;
+  className?: string;
   onClick?: () => Promise<void>;
 };
 
-export const Button: VFC<Props> = ({ children, onClick }) => {
-  const handleSignIn = onClick;
+export const Button: VFC<Props> = ({ children, className, onClick }) => {
+  const handleOnClick = onClick;
 
   return (
     <button
-      className="
-        py-2 w-52 text-lg hover:bg-gray-700 
-        rounded border transition
-      "
-      onClick={handleSignIn}
+      className={`
+        py-2 hover:bg-gray-700 
+        rounded border transition ${className}
+      `}
+      onClick={handleOnClick}
     >
       {children}
     </button>

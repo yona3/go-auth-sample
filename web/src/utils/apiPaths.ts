@@ -7,6 +7,7 @@ export const apiPaths = {
     oauth2: () => `${root}/google/oauth2`,
   },
   token: () => `${root}/token`,
+  refreshToken: () => `${root}/refresh_token`,
   users: {
     root: () => `${root}/users`,
     me: () => `${root}/users/me`,

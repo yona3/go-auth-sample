@@ -28,3 +28,13 @@ export const fetchMe = (accessToken: string) =>
 
 export const signInWithGoogle = () =>
   fetcher(apiPaths.google.oauth2(), { method: "GET" });
+
+export const signOut = (accessToken: string) =>
+  fetcher(apiPaths.refreshToken(), {
+    method: "DELETE",
+    headers: {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      Authorization: `Bearer ${accessToken}`,
+    },
+    credentials: "include",
+  });
