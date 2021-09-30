@@ -20,7 +20,7 @@ func SetRefreshToken(w http.ResponseWriter, uuid uuid.UUID) error {
 	}
 
 	// set refresh token to cookie
-	cookie := http.Cookie{
+	c := &http.Cookie{
 		Path:     "/",
 		Name:     "token",
 		Value:    tokenStrnig,
@@ -29,7 +29,19 @@ func SetRefreshToken(w http.ResponseWriter, uuid uuid.UUID) error {
 		Secure:   false, // !change to true when deploy to production
 		SameSite: http.SameSiteLaxMode,
 	}
-	http.SetCookie(w, &cookie)
+	http.SetCookie(w, c)
+
+	return nil
+}
+
+func RevokeRefreshToken(w http.ResponseWriter, r *http.Request) error {
+	c, err := r.Cookie("token")
+	if err != nil {
+		return err
+	}
+
+	c.MaxAge = -1
+	http.SetCookie(w, c)
 
 	return nil
 }
