@@ -31,7 +31,9 @@ export const SignIn: VFC = () => {
       <h1 className="font-mono text-2xl">Sign In</h1>
       <div className="pt-12">
         <div>
-          <Button onClick={handleSignin}>Google</Button>
+          <Button className="w-40 text-lg" onClick={handleSignin}>
+            Google
+          </Button>
         </div>
       </div>
     </div>
