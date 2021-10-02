@@ -7,5 +7,5 @@ export type User = {
   signinWith: "email" | "google" | "twitter";
   createdAt: string;
   updatedAt: string;
-  loggedOutAt: Date;
+  loggedOutAt: string;
 };

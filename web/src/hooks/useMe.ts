@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { fetchMe } from "src/api";
 import { meState } from "src/state";
+import { toCamelCaseObjectKey } from "src/utils/toCamelCase";
+import { isMe } from "src/utils/typeGuard";
 
 import { useAccessToken } from "./useAccessToken";
 
@@ -19,21 +21,10 @@ export const useMe = () => {
       const response = await fetchMe(accessToken);
       const data = await response.json();
 
-      // todo: convert snack_case to camelCase
-      const me = {
-        ...data,
-        signinWith: data.signin_with,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
-        loggedOutAt: data.logged_out_at,
-      };
+      const me = toCamelCaseObjectKey(data);
+      if (!isMe(me)) throw new Error("me doc is invalid");
 
-      delete me.signin_with;
-      delete me.created_at;
-      delete me.updated_at;
-      delete me.logged_out_at;
-
-      // todo: fix any
+      console.log("me: ", me);
       setMe(me);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
