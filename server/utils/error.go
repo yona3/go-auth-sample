@@ -29,6 +29,18 @@ func NewRedirectOptions(r *http.Request) RedirectOptions {
 	}
 }
 
+func NewHandleServerErrorWithDefaultOptions(defaultOpts ...HandleServerErrorOptions) func(w http.ResponseWriter, err error, opts ...HandleServerErrorOptions) {
+	return func(w http.ResponseWriter, err error, opts ...HandleServerErrorOptions) {
+		var optsArray []HandleServerErrorOptions
+
+		// set options
+		optsArray = append(optsArray, defaultOpts...)
+		optsArray = append(optsArray, opts...)
+
+		HandleServerError(w, err, optsArray...)
+	}
+}
+
 func HandleServerError(w http.ResponseWriter, err error, opts ...HandleServerErrorOptions) {
 	code := http.StatusInternalServerError
 	message := "Internal Server Error"

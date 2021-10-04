@@ -15,9 +15,10 @@ import (
 )
 
 var (
-	userData        *ent.User
-	redirectOptions utils.RedirectOptions
-	defaultOptions  utils.HandleServerErrorOptions
+	userData          *ent.User
+	redirectOptions   utils.RedirectOptions
+	defaultOptions    utils.HandleServerErrorOptions
+	handleServerError func(w http.ResponseWriter, err error, opts ...utils.HandleServerErrorOptions)
 )
 
 type CallbackController struct {
@@ -39,6 +40,7 @@ func (c *CallbackController) Index(w http.ResponseWriter, r *http.Request) {
 	defaultOptions = utils.HandleServerErrorOptions{
 		RedirectOptions: redirectOptions,
 	}
+	handleServerError = utils.NewHandleServerErrorWithDefaultOptions(defaultOptions)
 
 	switch r.Method {
 	case "GET":
@@ -51,7 +53,7 @@ func (c *CallbackController) Index(w http.ResponseWriter, r *http.Request) {
 			Code:    http.StatusMethodNotAllowed,
 			Message: msg,
 		}
-		utils.HandleServerError(w, nil, opts, defaultOptions)
+		handleServerError(w, nil, opts)
 	}
 }
 
@@ -75,7 +77,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 			Code:    http.StatusBadRequest,
 			Message: msg,
 		}
-		utils.HandleServerError(w, nil, opts)
+		handleServerError(w, nil, opts)
 		return
 	}
 
@@ -84,7 +86,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 	// get token
 	tok, err := config.Exchange(ctx, req.Code)
 	if err != nil {
-		utils.HandleServerError(w, err)
+		handleServerError(w, err)
 		return
 	}
 
@@ -96,7 +98,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		opts := utils.HandleServerErrorOptions{
 			Message: msg,
 		}
-		utils.HandleServerError(w, err, opts, defaultOptions)
+		handleServerError(w, err, opts)
 		return
 	}
 
@@ -108,7 +110,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		opts := utils.HandleServerErrorOptions{
 			Message: msg,
 		}
-		utils.HandleServerError(w, err, opts, defaultOptions)
+		handleServerError(w, err, opts)
 		return
 	}
 
@@ -116,14 +118,14 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 
 	s, err := v2.NewService(ctx, opts)
 	if err != nil {
-		utils.HandleServerError(w, err, defaultOptions)
+		handleServerError(w, err)
 		return
 	}
 
 	// get user info from service
 	info, err := s.Userinfo.V2.Me.Get().Do()
 	if err != nil {
-		utils.HandleServerError(w, err, defaultOptions)
+		handleServerError(w, err)
 		return
 	}
 
@@ -136,7 +138,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		// create user
 		new, err := db.User.Create().SetEmail(info.Email).SetName(info.Name).SetSigninWith("google").Save(ctx)
 		if err != nil {
-			utils.HandleServerError(w, err, defaultOptions)
+			handleServerError(w, err)
 			return
 		}
 
@@ -152,7 +154,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 				Code:    http.StatusBadRequest,
 				Message: msg,
 			}
-			utils.HandleServerError(w, nil, opts, defaultOptions)
+			handleServerError(w, nil, opts)
 			return
 		}
 
@@ -161,7 +163,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if userData == nil {
-		utils.HandleServerError(w, err, defaultOptions)
+		handleServerError(w, err)
 		return
 	}
 
@@ -173,7 +175,7 @@ func (c *CallbackController) get(w http.ResponseWriter, r *http.Request) {
 		opts := utils.HandleServerErrorOptions{
 			Message: msg,
 		}
-		utils.HandleServerError(w, err, opts, defaultOptions)
+		handleServerError(w, err, opts)
 		return
 	}
 
