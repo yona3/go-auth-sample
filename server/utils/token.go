@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"net/http"
 	"os"
 	"time"
@@ -9,10 +10,15 @@ import (
 	"github.com/google/uuid"
 )
 
-func SetRefreshToken(w http.ResponseWriter, uuid uuid.UUID) error {
+func SetRefreshToken(w http.ResponseWriter, id uuid.UUID) error {
+	// check uuid
+	if id == uuid.Nil {
+		return errors.New("uuid is nil")
+	}
+
 	// generate refresh token
 	expiresAt := time.Now().Add(time.Hour * 24 * 7).Unix()
-	claims := NewJWTClaims(uuid, expiresAt)
+	claims := NewJWTClaims(id, expiresAt)
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenStrnig, err := refreshToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
@@ -41,6 +47,7 @@ func RevokeRefreshToken(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	c.MaxAge = -1
+	c.Value = ""
 	http.SetCookie(w, c)
 
 	return nil
