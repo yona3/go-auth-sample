@@ -15,30 +15,18 @@ func TestSetRefreshToken(t *testing.T) {
 		uuid uuid.UUID
 	}
 
-	tests := []struct {
+	recorder := httptest.NewRecorder()
+
+	cases := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{
-			name: "pass",
-			args: args{
-				w:    httptest.NewRecorder(),
-				uuid: uuid.New(),
-			},
-			wantErr: false,
-		},
-		{
-			name: "fail",
-			args: args{
-				w:    httptest.NewRecorder(),
-				uuid: uuid.Nil,
-			},
-			wantErr: true,
-		},
+		{"pass", args{recorder, uuid.New()}, false},
+		{"fail", args{recorder, uuid.Nil}, true},
 	}
 
-	for _, tt := range tests {
+	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := SetRefreshToken(tt.args.w, tt.args.uuid); (err != nil) != tt.wantErr {
 				t.Errorf("SetRefreshToken() error = %v, wantErr %v", err, tt.wantErr)
@@ -69,11 +57,14 @@ func TestRevokeRefreshToken(t *testing.T) {
 		r *http.Request
 	}
 
-	// new pass request
+	// new requests
 	passRequest, err := http.NewRequest(http.MethodDelete, "/", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
+	failRequest := httptest.NewRequest(http.MethodDelete, "/", nil)
+
+	recorder := httptest.NewRecorder()
 
 	// set cookie
 	passRequest.AddCookie(&http.Cookie{
@@ -81,30 +72,16 @@ func TestRevokeRefreshToken(t *testing.T) {
 		Value: "test",
 	})
 
-	tests := []struct {
+	cases := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{
-			name: "pass",
-			args: args{
-				w: httptest.NewRecorder(),
-				r: passRequest,
-			},
-			wantErr: false,
-		},
-		{
-			name: "fail",
-			args: args{
-				w: httptest.NewRecorder(),
-				r: httptest.NewRequest(http.MethodDelete, "/", nil),
-			},
-			wantErr: true,
-		},
+		{"pass", args{recorder, passRequest}, false},
+		{"fail", args{recorder, failRequest}, true},
 	}
 
-	for _, tt := range tests {
+	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := RevokeRefreshToken(tt.args.w, tt.args.r); (err != nil) != tt.wantErr {
 				t.Errorf("RevokeRefreshToken() error = %v, wantErr %v", err, tt.wantErr)
